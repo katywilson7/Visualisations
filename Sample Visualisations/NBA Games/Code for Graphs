@@ -1,0 +1,71 @@
+#Code:
+
+#NBA code:
+ggplot(dg, 
+       aes(x=home, y = away, fill = as.character(games)))+ 
+  geom_tile(color = 'black') + 
+  theme_pub() +
+  theme(axis.text.x = element_text(angle = 90, 
+                                    hjust = 1, 
+                                    vjust = 0.3)) +
+labs(title = "Number of Games Played Between Teams in 2022 Season",
+     x = "Home Team",
+     y = "Away Team",
+     fill = "Number of Games Played") +
+  scale_fill_manual(values = c("1" = "dodgerblue1", "2" = "orangered3", na.value ="white"))
+
+#NBA by division code:
+tms = tms %>% 
+  arrange(conf, div) %>% # sort rows based on conference and division
+  mutate(conf = paste0(toupper(substr(conf, 1, 1)), # capitalises first letter of conference 
+                               substr(conf, 2, nchar(conf))),
+         
+         div  = paste0(toupper(substr(div , 1, 1)),  
+                               substr(div , 2, nchar( div))), 
+
+         div  = factor(div,  # converts division column into factor with levels 
+                       levels = unique(div))) 
+head(tms)
+
+## your code here
+
+dg2 = dg %>% 
+  mutate(away = factor(away, levels = tms$team), #convert away col to factor based on level in team col
+         home = factor(home, levels = tms$team)) # repeat for home teams
+
+ggplot(dg2, 
+       aes(x=home, y = away, fill = as.character(games)))+ 
+  geom_tile(color = 'black') + 
+  theme_pub() +
+  theme(axis.text.x = element_text(angle = 90, 
+                                    hjust = 1, 
+                                    vjust = 0.3)) +
+labs(title = "Number of Games Played Between Teams in 2022 Season",
+     subtitle = "by Division",
+     x = "Home Team",
+     y = "Away Team",
+     fill = "Number of Games Played") +
+  scale_fill_manual(values = c("0" = "white","1" = "dodgerblue1", "2" = "orangered3"))
+
+## NBA by division (2) code
+dg3 = dg2 %>% 
+  mutate(division_away = tms$div[match(away, tms$team)]) %>% # match away col to team col and return div col
+  mutate(division_home = tms$div[match(home, tms$team)]) # repeat for home teams
+
+ggplot(dg3, 
+       aes(x=away, y = home, fill = as.character(games)))+ 
+  geom_tile(color = 'black') + 
+  theme_pub() +
+  theme(axis.text.x = element_text(angle = 90, 
+                                    hjust = 1, 
+                                    vjust = 0.3)) +
+  facet_grid(rows = vars(dg3$division_home), 
+             cols = vars(dg3$division_away), 
+             scales = "free", 
+             space = "free")+
+labs(title = "Number of Games Played Between Teams in 2022 Season",
+     x = "Home Team",
+     y = "Away Team",
+     fill = "Number of Games Played") +
+  scale_fill_manual(values = c(na.value = "white","1" = "dodgerblue1", "2" = "orangered3"))
+
